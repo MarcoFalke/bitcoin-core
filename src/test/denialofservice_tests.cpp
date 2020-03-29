@@ -34,8 +34,6 @@ static CService ip(uint32_t i)
     return CService(CNetAddr(s), Params().GetDefaultPort());
 }
 
-static NodeId id = 0;
-
 void UpdateLastBlockAnnounceTime(NodeId node, int64_t time_in_seconds);
 
 BOOST_FIXTURE_TEST_SUITE(denialofservice_tests, TestingSetup)
@@ -57,6 +55,7 @@ BOOST_AUTO_TEST_CASE(outbound_slow_chain_eviction)
 
     // Mock an outbound peer
     CAddress addr1(ip(0xa0b0c001), NODE_NONE);
+    static NodeId id = 0;
     CNode dummyNode1(id++, ServiceFlags(NODE_NETWORK | NODE_WITNESS), INVALID_SOCKET, addr1, /* nKeyedNetGroupIn */ 0, /* nLocalHostNonceIn */ 0, CAddress(), /* pszDest */ "", ConnectionType::OUTBOUND_FULL_RELAY, /* inbound_onion */ false);
     dummyNode1.SetCommonVersion(PROTOCOL_VERSION);
 
@@ -106,6 +105,7 @@ BOOST_AUTO_TEST_CASE(outbound_slow_chain_eviction)
 static void AddRandomOutboundPeer(std::vector<CNode*>& vNodes, PeerManager& peerLogic, ConnmanTestMsg& connman)
 {
     CAddress addr(ip(g_insecure_rand_ctx.randbits(32)), NODE_NONE);
+    static NodeId id = 0;
     vNodes.emplace_back(new CNode(id++, ServiceFlags(NODE_NETWORK | NODE_WITNESS), INVALID_SOCKET, addr, /* nKeyedNetGroupIn */ 0, /* nLocalHostNonceIn */ 0, CAddress(), /* pszDest */ "", ConnectionType::OUTBOUND_FULL_RELAY, /* inbound_onion */ false));
     CNode &node = *vNodes.back();
     node.SetCommonVersion(PROTOCOL_VERSION);
@@ -210,6 +210,7 @@ BOOST_AUTO_TEST_CASE(peer_discouragement)
     std::array<CNode*, 3> nodes;
 
     banman->ClearBanned();
+    static NodeId id = 0;
     nodes[0] = new CNode{id++, NODE_NETWORK, INVALID_SOCKET, addr[0], /* nKeyedNetGroupIn */ 0,
                          /* nLocalHostNonceIn */ 0, CAddress(), /* pszDest */ "",
                          ConnectionType::INBOUND, /* inbound_onion */ false};
@@ -295,6 +296,7 @@ BOOST_AUTO_TEST_CASE(DoS_bantime)
     SetMockTime(nStartTime); // Overrides future calls to GetTime()
 
     CAddress addr(ip(0xa0b0c001), NODE_NONE);
+    static NodeId id = 0;
     CNode dummyNode(id++, NODE_NETWORK, INVALID_SOCKET, addr, /* nKeyedNetGroupIn */ 4, /* nLocalHostNonceIn */ 4, CAddress(), /* pszDest */ "", ConnectionType::INBOUND, /* inbound_onion */ false);
     dummyNode.SetCommonVersion(PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode);
