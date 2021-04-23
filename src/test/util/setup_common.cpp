@@ -86,6 +86,7 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName, const std::ve
             "-debugexclude=leveldb",
         },
         extra_args);
+    SetupEnvironment();
     util::ThreadRename("test");
     fs::create_directories(m_path_root);
     m_args.ForceSetArg("-datadir", m_path_root.string());
@@ -106,7 +107,6 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName, const std::ve
     LogInstance().StartLogging();
     SHA256AutoDetect();
     ECC_Start();
-    SetupEnvironment();
     SetupNetworking();
     InitSignatureCache();
     InitScriptExecutionCache();
