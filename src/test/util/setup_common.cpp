@@ -12,6 +12,7 @@
 #include <consensus/validation.h>
 #include <crypto/sha256.h>
 #include <init.h>
+#include <init/common.h>
 #include <interfaces/chain.h>
 #include <miner.h>
 #include <net.h>
@@ -104,9 +105,8 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName, const std::ve
     if (G_TEST_LOG_FUN) LogInstance().PushBackCallback(G_TEST_LOG_FUN);
     InitLogging(*m_node.args);
     AppInitParameterInteraction(*m_node.args);
+    Assert(AppInitSanityChecks());
     LogInstance().StartLogging();
-    SHA256AutoDetect();
-    ECC_Start();
     SetupNetworking();
     InitSignatureCache();
     InitScriptExecutionCache();
@@ -126,7 +126,7 @@ BasicTestingSetup::~BasicTestingSetup()
     LogInstance().DisconnectTestLogger();
     fs::remove_all(m_path_root);
     gArgs.ClearArgs();
-    ECC_Stop();
+    init::UnsetGlobals();
 }
 
 ChainTestingSetup::ChainTestingSetup(const std::string& chainName, const std::vector<const char*>& extra_args)
