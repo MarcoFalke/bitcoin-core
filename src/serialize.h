@@ -23,6 +23,7 @@
 
 #include <prevector.h>
 #include <span.h>
+#include <util/types.h>
 
 /**
  * The maximum size of a serialized object in bytes or number of elements
