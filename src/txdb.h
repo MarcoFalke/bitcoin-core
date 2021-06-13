@@ -8,17 +8,11 @@
 
 #include <coins.h>
 #include <dbwrapper.h>
-#include <chain.h>
-#include <primitives/block.h>
 
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-
-class CBlockIndex;
-class CCoinsViewDBCursor;
-class uint256;
 
 //! -dbcache default (MiB)
 static const int64_t nDefaultDbCache = 450;
