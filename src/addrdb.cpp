@@ -203,7 +203,21 @@ bool CBanDB::Read(banmap_t& banSet, bool& dirty)
     if (!fs::exists(m_banlist_json)) {
         // If this succeeds then we need to flush to disk in order to create the JSON banlist.
         dirty = true;
-        return DeserializeFileDB(m_banlist_dat, banSet, CLIENT_VERSION);
+        if (!DeserializeFileDB(m_banlist_dat, banSet, CLIENT_VERSION)) {
+            // Issue already logged
+            return false;
+        }
+        for (auto it{banSet.begin()}; it != banSet.end();) {
+            const bool version_valid{CBanEntry::CURRENT_VERSION == it->second.nVersion};
+            const CSubNet& subnet{it->first};
+            if (subnet.IsValid() && version_valid) {
+                ++it;
+            } else {
+                LogPrintf("Cannot parse banned address or subnet: %s\n", subnet.ToString());
+                it = banSet.erase(it);
+            }
+        }
+        return true;
     }
 
     dirty = false;
