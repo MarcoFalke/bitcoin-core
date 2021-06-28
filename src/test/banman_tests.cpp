@@ -52,6 +52,24 @@ BOOST_AUTO_TEST_CASE(file)
             assert(entries_read.size() == 1);
         }
     }
+    {
+        const std::string entries_write{
+            "{ \"banned_nets\": ["
+            "  { \"version\": 1, \"ban_created\": 0, \"banned_until\": 778, \"address\": \"aaaaaaaaa\" },"
+            "  { \"version\": 2, \"ban_created\": 0, \"banned_until\": 778, \"address\": \"bbbbbbbbb\" },"
+            "  { \"version\": 1, \"ban_created\": 0, \"banned_until\": 778, \"address\": \"1.0.0.0/8\" }"
+            "] }"};
+        assert(WriteBinaryFile(banlist_path.string() + ".json", entries_write));
+        {
+            // The invalid entries will be dropped, but the valid one remains
+            ASSERT_DEBUG_LOG("Dropping entry with unparseable address or subnet: aaaaaaaaa");
+            ASSERT_DEBUG_LOG("Dropping entry with unknown version (2) from ban list");
+            BanMan banman{banlist_path, nullptr, 0};
+            banmap_t entries_read;
+            banman.GetBanned(entries_read);
+            assert(entries_read.size() == 1);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
