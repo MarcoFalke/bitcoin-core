@@ -490,8 +490,6 @@ class CSubNet
         CNetAddr network;
         /// Netmask, in network byte order
         uint8_t netmask[16];
-        /// Is this value valid? (only used to signal parse errors)
-        bool valid;
 
         bool SanityCheck() const;
 
@@ -548,9 +546,8 @@ class CSubNet
             } else {
                 s >> netmask;
             }
-            s >> valid;
-            // Mark invalid if the result doesn't pass sanity checking.
-            if (valid) valid = SanityCheck();
+            bool dummy; // was "valid"
+            s >> dummy;
         }
 };
 
