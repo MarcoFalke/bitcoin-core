@@ -205,7 +205,7 @@ public:
      *   * Bitcoin Core version N+2 introduces a new incompatible format=5. It will write
      *     (format=5, lowest_compatible=5) and so any versions that do not know how to parse
      *     format=5 will not try to read the file.
-     * * nKey
+     * * m_key
      * * nNew
      * * nTried
      * * number of "new" buckets XOR 2**30
@@ -246,7 +246,7 @@ public:
         static constexpr uint8_t lowest_compatible = Format::V3_BIP155;
         s << static_cast<uint8_t>(INCOMPATIBILITY_BASE + lowest_compatible);
 
-        s << nKey;
+        s << m_key;
         s << nNew;
         s << nTried;
 
@@ -325,7 +325,7 @@ public:
                 format, lowest_compatible, PACKAGE_NAME, static_cast<uint8_t>(FILE_FORMAT)));
         }
 
-        s >> nKey;
+        s >> m_key;
         s >> nNew;
         s >> nTried;
         int nUBuckets = 0;
@@ -357,8 +357,8 @@ public:
         for (int n = 0; n < nTried; n++) {
             CAddrInfo info;
             s >> info;
-            int nKBucket = info.GetTriedBucket(nKey, m_asmap);
-            int nKBucketPos = info.GetBucketPosition(nKey, false, nKBucket);
+            int nKBucket = info.GetTriedBucket(m_key, m_asmap);
+            int nKBucketPos = info.GetBucketPosition(m_key, false, nKBucket);
             if (vvTried[nKBucket][nKBucketPos] == -1) {
                 info.nRandomPos = vRandom.size();
                 info.fInTried = true;
@@ -418,7 +418,7 @@ public:
             // this bucket_entry.
             if (info.nRefCount >= ADDRMAN_NEW_BUCKETS_PER_ADDRESS) continue;
 
-            int bucket_position = info.GetBucketPosition(nKey, true, bucket);
+            int bucket_position = info.GetBucketPosition(m_key, true, bucket);
             if (restore_bucketing && vvNew[bucket][bucket_position] == -1) {
                 // Bucketing has not changed, using existing bucket positions for the new table
                 vvNew[bucket][bucket_position] = entry_index;
@@ -426,8 +426,8 @@ public:
             } else {
                 // In case the new table data cannot be used (bucket count wrong or new asmap),
                 // try to give them a reference based on their primary source address.
-                bucket = info.GetNewBucket(nKey, m_asmap);
-                bucket_position = info.GetBucketPosition(nKey, true, bucket);
+                bucket = info.GetNewBucket(m_key, m_asmap);
+                bucket_position = info.GetBucketPosition(m_key, true, bucket);
                 if (vvNew[bucket][bucket_position] == -1) {
                     vvNew[bucket][bucket_position] = entry_index;
                     ++info.nRefCount;
@@ -460,7 +460,7 @@ public:
     {
         LOCK(cs);
         std::vector<int>().swap(vRandom);
-        nKey = insecure_rand.rand256();
+        m_key = insecure_rand.rand256();
         for (size_t bucket = 0; bucket < ADDRMAN_NEW_BUCKET_COUNT; bucket++) {
             for (size_t entry = 0; entry < ADDRMAN_BUCKET_SIZE; entry++) {
                 vvNew[bucket][entry] = -1;
@@ -487,7 +487,7 @@ public:
 
     ~CAddrMan()
     {
-        nKey.SetNull();
+        m_key.SetNull();
     }
 
     //! Return the number of (unique) addresses in all tables.
@@ -622,7 +622,7 @@ public:
 
 protected:
     //! secret key to randomize bucket select with
-    uint256 nKey;
+    uint256 m_key;
 
     //! Source of random numbers for randomization in inner loops
     FastRandomContext insecure_rand;

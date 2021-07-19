@@ -37,7 +37,7 @@ public:
     //! Ensure that bucket placement is always the same for testing purposes.
     void MakeDeterministic()
     {
-        nKey.SetNull();
+        m_key.SetNull();
         insecure_rand = FastRandomContext(true);
     }
 };
@@ -60,7 +60,7 @@ public:
         unsigned char nVersion = 1;
         s << nVersion;
         s << ((unsigned char)32);
-        s << nKey;
+        s << m_key;
         s << 10; // nNew
         s << 10; // nTried
 

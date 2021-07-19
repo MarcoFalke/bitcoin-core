@@ -34,7 +34,7 @@ public:
     //! Ensure that bucket placement is always the same for testing purposes.
     void MakeDeterministic()
     {
-        nKey.SetNull();
+        m_key.SetNull();
         insecure_rand = FastRandomContext(true);
     }
 
@@ -87,11 +87,10 @@ public:
     {
         CAddrMan::Clear();
         if (deterministic) {
-            nKey.SetNull();
+            m_key.SetNull();
             insecure_rand = FastRandomContext(true);
         }
     }
-
 };
 
 static CNetAddr ResolveIP(const std::string& ip)
